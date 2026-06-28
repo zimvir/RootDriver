@@ -1,7 +1,18 @@
+
+# env
 __pycache__/
 *.pyc
 .venv/
-.idea/
-.pytest_cache/
-dist/
 *.egg-info/
+.pytest_cache/
+
+# pypi
+dist/
+
+# claude
+.claude
+
+# ide
+.idea
+
+
