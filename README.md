@@ -37,19 +37,23 @@ def get_weather(city: str) -> str:
 ```python
 from rootdriver import Agent, AgentLLM, OpenAIAdapter
 
-agent = Agent(
-    agent_llm=AgentLLM(
-        adapter=OpenAIAdapter(
-            api_key="YOUR_API_KEY",
-            base_url="BASE_URL"
-        ),
-        model="gpt-4",
+agent_llm = AgentLLM(
+    adapter=OpenAIAdapter(
+        api_key="YOUR_API_KEY",
+        base_url="BASE_URL"
     ),
+    model= "gpt-4",
+    temperature=0.7
+    )
+
+
+agent = Agent(
+    agent_llm=agent_llm,
     tools=[get_weather],
     system_prompt="你是一个有用的助手",
 )
 
-# 单次对话
+# 单次对话(无 tool)
 response = agent.talk("北京天气怎么样？")
 print(response)
 ```
@@ -69,7 +73,6 @@ import asyncio
 from rootdriver import Agent, AgentLLM, OpenAIAdapter
 
 async def main():
-    agent = Agent(agent_llm=AgentLLM(...))
 
     # 单次异步对话
     response = await agent.atalk("你好")
