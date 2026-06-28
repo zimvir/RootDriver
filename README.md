@@ -11,6 +11,7 @@
 - **工具调用**：支持 function calling，自动执行工具并返回结果
 - **状态管理**：支持内存和数据库持久化检查点
 - **异常体系**：完整的异常类层次结构
+- **异步支持**：全面异步支持，并发多 Agent / 工具调用
 
 ## 安装
 
@@ -59,6 +60,29 @@ print(response)
 # 完整对话循环（包含工具调用）
 response = agent.react("帮我查下上海天气")
 print(response)
+```
+
+### 异步用法
+
+```python
+import asyncio
+from rootdriver import Agent, AgentLLM, OpenAIAdapter
+
+async def main():
+    agent = Agent(agent_llm=AgentLLM(...))
+
+    # 单次异步对话
+    response = await agent.atalk("你好")
+    print(response)
+
+    # 并发多个 Agent
+    results = await asyncio.gather(
+        agent.areact("问题1"),
+        agent.areact("问题2"),
+        agent.areact("问题3"),
+    )
+
+asyncio.run(main())
 ```
 
 ## 核心组件

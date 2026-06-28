@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.0 (2026-06-28)
+
+### Features
+
+- **异步支持** - 全面支持异步操作，支持并发多 Agent 场景
+  - `BaseTool.ainvoke()` - 异步工具执行
+  - `Tool.ainvoke()` / `Tool.ainvoke_many()` - 异步工具调用
+  - `OpenAIAdapter.ainvoke()` - 异步 LLM 调用
+  - `LLM.ainvoke()` - 异步 LLM 封装
+  - `Engine.ainvoke()` / `Engine.achat()` / `Engine.arun()` - 异步引擎
+  - `Agent.areact()` / `Agent.atalk()` - 异步 Agent
+
+- **并发优化** - 同步函数自动转异步执行
+  - 使用 `asyncio.to_thread()` 避免同步工具阻塞事件循环
+  - 支持 `asyncio.gather()` 并发执行多个工具/Agent
+
+### Code Quality
+
+- 测试覆盖：31 个测试全部通过
+- 新增异步工具测试 `test_tool_async.py`
+
+---
+
 ## 0.2.0 (2026-06-27)
 
 ### Features

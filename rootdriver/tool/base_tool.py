@@ -1,5 +1,5 @@
 from typing import Callable
-
+import asyncio
 from ..types.tool import ToolDefinition
 
 class BaseTool:
@@ -50,6 +50,21 @@ class BaseTool:
             parameters["properties"][param_name] = prop
 
         return parameters
+
+    """==========异步部分=========="""
+    async def ainvoke(self, arguments: dict, *, retry: int = 1) -> str:
+        """执行工具，返回字符串。retry: 失败重试次数。"""
+        error = None
+        for _ in range(retry):
+            try:
+                if asyncio.iscoroutinefunction(self.func):
+                    return str(await self.func(**arguments))
+                else:
+                    return str(await asyncio.to_thread(self.func, **arguments))
+            except Exception as e:
+                error = e
+        return str(error)
+
 
     def __call__(self, **kwargs):
         return self.invoke(kwargs)

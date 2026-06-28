@@ -1,7 +1,7 @@
 """工具集合。"""
 
 from typing import Callable
-
+import asyncio
 from rootdriver.types.tool import ToolCall, ToolDefinition, ToolResult
 from rootdriver.exception import ToolNotFoundError
 
@@ -45,3 +45,36 @@ class Tool:
     def to_definitions(self) -> list[ToolDefinition]:
         """生成所有工具的 ToolDefinition 列表（发给 LLM）。"""
         return [t.to_definition() for t in self._map.values()]
+
+    """==========异步部分=========="""
+
+    async def ainvoke(self, tool_call: ToolCall, *, retry: int = 1) -> ToolResult:
+        """执行单个工具异步调用。"""
+        t = self.get(tool_call.name)
+        if t is None:
+            raise ToolNotFoundError(tool_call.name, list(self._map.keys()))
+        content = await t.ainvoke(tool_call.arguments, retry=retry)
+        return ToolResult(tool_call_id=tool_call.id, content=content)
+
+    async def ainvoke_many(self, tool_calls: list[ToolCall]) -> list[ToolResult]:
+        """批量执行工具调用。"""
+        return [await self.ainvoke(tc) for tc in tool_calls]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

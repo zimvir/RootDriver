@@ -21,4 +21,8 @@ class BaseAdapter(ABC):
     def invoke(self, llm_request: LLMRequest) -> "LLMResponse":
         pass
 
+    @abstractmethod
+    async def ainvoke(self, llm_request: LLMRequest) -> "LLMResponse":
+        pass
+
 

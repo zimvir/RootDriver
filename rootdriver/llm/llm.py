@@ -18,5 +18,14 @@ class LLM:
         response = self.adapter.invoke(llm_request)
         return response
 
+    async def ainvoke(self, llm_request: LLMRequest) -> LLMResponse:
+        """
+        异步把信息发给llm， llm返回信息
+        Returns:
+            LLMResponse
+        """
+        response = await self.adapter.ainvoke(llm_request)
+        return response
+
     
 

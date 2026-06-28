@@ -17,6 +17,7 @@ class OpenAIAdapter(BaseAdapter):
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
         self.base_url = base_url or os.environ.get("OPENAI_BASE_URL", "")
         self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url or None)
+        self.async_client = openai.AsyncOpenAI(api_key=self.api_key, base_url=self.base_url or None)
 
     def request_to_provider(self, req: LLMRequest) -> dict:
         """LLMRequest → OpenAI API 格式。"""
@@ -103,4 +104,10 @@ class OpenAIAdapter(BaseAdapter):
         """发送请求并返回 LLMResponse。"""
         payload = self.request_to_provider(req)
         resp = self.client.chat.completions.create(**payload)
+        return self.response_to_frame(resp)
+
+    async def ainvoke(self, req: LLMRequest) -> LLMResponse:
+        """异步发送请求并返回 LLMResponse。"""
+        payload = self.request_to_provider(req)
+        resp = await self.async_client.chat.completions.create(**payload)
         return self.response_to_frame(resp)
