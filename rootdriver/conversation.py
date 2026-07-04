@@ -54,8 +54,12 @@ class Conversation:
 
     def get_messages_in_list(self) -> list[dict]:
         '''返回 字典加列表组成的message（可转成json用于网络、跨语言传输） 组成的列表'''
-        return [m.model_dump(exclude_none=True) for m in self.messages]
-
+        return [m.model_dump(exclude_none=False) for m in self.messages]
+    def get_message_by_index(self, index: int=-1) -> Message:
+        return self.messages[index]
+    def get_message_in_list_by_index(self, index:int=-1) -> list[dict]:
+        """据索引返回当前消息列表的"""
+        return self.messages[index].model_dump(exclude_none=False)
     @classmethod
     def from_dict_list(cls, messages: list[dict]) -> "Conversation":
         conv = cls()
@@ -72,4 +76,11 @@ class Conversation:
     def clear(self) -> "Conversation":
         self.messages = []
         return self
+
+    def copy(self) -> "Conversation":
+        """返回当前 conversation 的浅拷贝"""
+        new_conv = Conversation()
+        new_conv.messages = list(self.messages)
+        new_conv.system_prompt = self.system_prompt
+        return new_conv
 

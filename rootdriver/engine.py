@@ -5,13 +5,16 @@ from .conversation import Conversation
 from .tool import Tool
 from .types import LLMRequest, Message
 from .utils import  get_iso_timestamp,build_tool_message, build_message
+from typing import Any
+
 
 class Engine:
-    def __init__(self, model:str, llm:LLM, conversation:Conversation, tool:Tool, ):
+    def __init__(self, model:str, llm:LLM, conversation:Conversation, tool:Tool, _agent: Any):
         self.llm = llm
         self.conversation = conversation
         self.tool = tool
         self.model = model
+        self._agent = _agent  # 以实现 agent 的 auto_save
 
     def invoke(self, input_message:Message) -> Message:
         """但系调用llm，并存入记忆，无tool调用"""
@@ -54,7 +57,6 @@ class Engine:
             # 6. 否： 追加并返回
             return response_message
 
-
     def run(self, input_message:Message) ->Message:
         """
         1. 追加输入
@@ -63,27 +65,18 @@ class Engine:
         4. 追加会话消息
         5. 判断 是否调用工具
         6. 是： tool 返回结果并追加，否： 追加并返回
-
-
         Returns:
 
         """
         self.conversation.append(input_message)
         while True:
-
             response_message = self.chat()
             result = self.deal_tool_or_output(response_message)
             if result is None:
                 continue
             elif isinstance(result, Message):
+                self._agent.state._auto_save()
                 return result
-
-
-
-    
-
-        
-
 
     def messages_to_llm_request(self,messages:list[Message]) -> LLMRequest:
         return LLMRequest(
@@ -102,7 +95,6 @@ class Engine:
         self.conversation.append(input_message)
         message = await self.achat()
         return message
-
 
     async def achat(self) -> Message:
         """
@@ -138,7 +130,6 @@ class Engine:
             # 6. 否： 追加并返回
             return response_message
 
-
     async def arun(self, input_message:Message) ->Message:
         """
         1. 追加输入
@@ -147,17 +138,15 @@ class Engine:
         4. 追加会话消息
         5. 判断 是否调用工具
         6. 是： tool 返回结果并追加，否： 追加并返回
-
-
         Returns:
 
         """
         self.conversation.append(input_message)
         while True:
-
             response_message = await self.achat()
             result = await self.adeal_tool_or_output(response_message)
             if result is None:
                 continue
             elif isinstance(result, Message):
+                self._agent.state._auto_save()
                 return result

@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.4.0 (2026-07-04)
+
+### Features
+
+- **JsonDB 模块** - 新增 JSON 文件数据库封装
+  - `JsonDB.update()` - 全量覆写指定 checkpoint
+  - `JsonDB.append()` - 增量追加单条消息
+  - `JsonDB.read()` - 读取 checkpoint 消息列表
+
+- **State 重构** - 持久化模块化，修复多个 bug
+  - `State._auto_save()` - 增量自动保存，只追加新消息不全量覆写
+  - `State.update_auto_save_data_saved_length()` - 同步已保存长度
+  - `auto_save` 参数 - Agent 级别开关，控制是否启用自动保存
+  - `Conversation.copy()` - 会话浅拷贝，用于 checkpoint 快照
+
+- **新增异常** - 完善异常体系
+  - `StateDBNotFoundError` - 数据库目标对象不存在
+  - `DBNotFoundError` - 数据库未找到结果
+
+- **新增工具方法** - `Conversation`
+  - `get_message_by_index()` - 按索引获取单条消息
+  - `get_message_in_list_by_index()` - 按索引获取消息字典
+- **增加两个默认值**
+  - `DEFAULT_AGENT_STATE_AUTO_SAVE_NAME`
+  - `DEFAULT_AGENT_DB_PATH`
+### Bug Fixes
+
+- 修复 `JsonDB.append()` 当 agent 存在但 checkpoint 不存在时的 KeyError
+- 修复 `State.save_from_now()` / `save_from_checkpoints()` 未处理 `agent_id=None` 默认值的问题
+- 修复 `Conversation` 缺少 `copy()` 方法的问题
+- 修复 `Engine` ↔ `Agent` 循环导入问题，改用 `Any` 类型注解
+
+### Code Quality
+
+- 测试覆盖：51 个测试全部通过
+- 新增 `tests/test_state.py`，覆盖 JsonDB 和 State 全量功能
+
+---
+
 ## 0.3.0 (2026-06-28)
 
 ### Features

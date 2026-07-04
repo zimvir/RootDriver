@@ -7,7 +7,8 @@ from .conversation import Conversation
 from .tool import Tool, BaseTool
 from .types.agent import AgentLLM
 from .state import State
-from .utils import build_system_message, build_message, build_tool_message, build_user_message, build_assistant_message
+from .utils import build_user_message, ensure_file_exist
+from .constants import DEFAULT_AGENT_DB_PATH
 
 class Agent:
 
@@ -19,23 +20,31 @@ class Agent:
         system_prompt: str | None = None,
 
         db_path: str| None = None,
+        auto_save: bool = True,
         # llm_retry: int = 3,
         # timeout: float | None = None,
     ):
+        # 检查信息
+        ensure_file_exist(db_path,"{}")
+
+        # 初始化模块
         self.id = id if id else uuid4().hex
-        self.db_path = db_path
+        self.db_path = DEFAULT_AGENT_DB_PATH
+        self.auto_save = auto_save
 
         self.conversation = Conversation(system_prompt)
         self.tool = Tool(tools if tools else [])
-        self.state = State(self, self.db_path)
+        self.state = State(self, self.db_path, self.auto_save)
 
         self.engine = Engine(
             model=agent_llm.model,
             llm=LLM(agent_llm.adapter),
             conversation=self.conversation,
             tool=self.tool,
+            _agent=self,
         )
-
+        # 属性初始化
+        self.state.update_auto_save_data_saved_length()
 
     def react(self, input_prompt:str) -> "str":
         """一次 react 循环"""

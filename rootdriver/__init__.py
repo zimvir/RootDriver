@@ -1,4 +1,4 @@
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 __author__ = "zimvir"
 __email__ = "zimvir@qq.com"
 
@@ -6,6 +6,7 @@ from .agent import Agent
 from .engine import Engine
 from .conversation import Conversation
 from .state import State
+from . import db
 from .llm import LLM
 from .llm.base_adapter import BaseAdapter
 from .llm.adapter import OpenAIAdapter
@@ -26,6 +27,8 @@ from .exception import (
     CheckpointNotFoundError,
     StateSaveError,
     StateLoadError,
+    StateDBNotFoundError,
+    DBNotFoundError,
 )
 
 __all__ = [
@@ -33,6 +36,7 @@ __all__ = [
     "Engine",
     "Conversation",
     "State",
+    "db",
     "LLM",
     "BaseAdapter",
     "OpenAIAdapter",
@@ -55,4 +59,6 @@ __all__ = [
     "CheckpointNotFoundError",
     "StateSaveError",
     "StateLoadError",
+    "StateDBNotFoundError",
+    "DBNotFoundError",
 ]

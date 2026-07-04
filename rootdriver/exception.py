@@ -110,10 +110,14 @@ class CheckpointNotFoundError(StateError):
 class StateSaveError(StateError):
     """状态保存失败。"""
 
-    pass
-
 
 class StateLoadError(StateError):
     """状态加载失败。"""
 
-    pass
+
+class StateDBNotFoundError(StateLoadError):
+    """数据库目标对象不存在"""
+# ============= DB 相关 ===============
+
+class DBNotFoundError(Exception):
+    """数据库未找到结果"""
