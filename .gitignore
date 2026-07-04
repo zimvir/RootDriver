@@ -15,4 +15,7 @@ dist/
 # ide
 .idea
 
+# example
+example_db.json
+
 
