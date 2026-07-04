@@ -1,4 +1,4 @@
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 __author__ = "zimvir"
 __email__ = "zimvir@qq.com"
 
@@ -6,6 +6,7 @@ from .agent import Agent
 from .engine import Engine
 from .conversation import Conversation
 from .state import State
+from . import types
 from . import db
 from .llm import LLM
 from .llm.base_adapter import BaseAdapter
@@ -36,6 +37,7 @@ __all__ = [
     "Engine",
     "Conversation",
     "State",
+    "types",
     "db",
     "LLM",
     "BaseAdapter",
@@ -46,6 +48,7 @@ __all__ = [
     "Message",
     "ToolDefinition",
     "ToolCall",
+
     "LLMError",
     "LLMInvokeError",
     "LLMResponseError",
