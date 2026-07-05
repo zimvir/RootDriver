@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rootdriver"
-version = "0.4.1"
+version = "0.4.2"
 description = "Start from Root, Driving All Things"
 readme = "README.md"
 license = {text = "MIT"}
@@ -25,5 +25,5 @@ dev = [
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
-[tool.setuptools]
-packages = ["rootdriver"]
+[tool.setuptools.packages.find]
+where = ["."]

@@ -1,4 +1,4 @@
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __author__ = "zimvir"
 __email__ = "zimvir@qq.com"
 
@@ -6,8 +6,6 @@ from .agent import Agent
 from .engine import Engine
 from .conversation import Conversation
 from .state import State
-from . import types
-from . import db
 from .llm import LLM
 from .llm.base_adapter import BaseAdapter
 from .llm.adapter import OpenAIAdapter
@@ -37,8 +35,6 @@ __all__ = [
     "Engine",
     "Conversation",
     "State",
-    "types",
-    "db",
     "LLM",
     "BaseAdapter",
     "OpenAIAdapter",
