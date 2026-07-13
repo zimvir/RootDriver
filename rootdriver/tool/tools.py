@@ -3,7 +3,7 @@
 from typing import Callable
 import asyncio
 from rootdriver.types.tool import ToolCall, ToolDefinition, ToolResult
-from rootdriver.exception import ToolNotFoundError
+from rootdriver.exceptions import ToolNotFoundError
 
 from .base_tool import BaseTool
 

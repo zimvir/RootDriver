@@ -9,7 +9,7 @@ RootDriver Agent 记忆持久化示例
 
 import os
 from rootdriver import Agent
-from rootdriver.types.agent import AgentLLM
+from rootdriver.types.config import LLMConfig
 from rootdriver.llm.adapter.openai_adapter import OpenAIAdapter
 from rootdriver.tool.base_tool import BaseTool
 
@@ -21,7 +21,7 @@ def get_weather(city: str) -> str:
 
 # 创建 adapter（需要 OPENAI_API_KEY 环境变量）
 adapter = OpenAIAdapter(os.environ.get("MINIMAX_API_KEY"), "https://api.minimaxi.com/v1")
-agent_llm = AgentLLM(model="MiniMax-M2.7", adapter=adapter)
+agent_llm = LLMConfig(model="MiniMax-M2.7", adapter=adapter)
 
 # 使用临时文件作为记忆数据库
 DB_PATH = "example_db.json"

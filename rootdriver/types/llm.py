@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from .messages import Message
+from .message import Message
 from .tool import ToolDefinition
 
 
@@ -13,7 +13,7 @@ class LLMRequest(BaseModel):
     model: str
     messages: list[Message]
     temperature: float = 0.7
-    max_tokens: int | None = None
+    max_tokens: int | None = None   # 这个属性在这个框架里没太大用，但openai 库里要，总之不要改
     tools: list[ToolDefinition] = Field(default_factory=list)
 
 

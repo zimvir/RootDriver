@@ -44,7 +44,7 @@ def test_delete_message():
     conv = Conversation()
     conv.append(Message(role="user", content="你好", created_at="2026-01-01T00:00:00"))
     conv.append(Message(role="assistant", content="你好！", created_at="2026-01-01T00:00:01"))
-    conv.delete()
+    conv.remove()
     assert len(conv.get_messages()) == 1
 
 

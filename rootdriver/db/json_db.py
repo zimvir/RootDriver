@@ -1,6 +1,6 @@
 import json
 
-from ..exception import DBNotFoundError
+from ..exceptions import DBAgentIDNotFoundError, CheckpointNotFoundError
 
 
 class JsonDB:
@@ -39,10 +39,19 @@ class JsonDB:
             json.dump(data, f, ensure_ascii=False, indent=2)
         return self
 
-    def read(self, name: str, agent_id: str, raise_error_if_not_found_agent_id: bool = False) -> list[dict]:
+    def read(self, name: str, agent_id: str) -> list[dict]|None:
+        """
+        Return:
+            若 未找到 agent id 报错 DBAgentIDNotFoundError;
+            未找到 checpoint 返回 None
+        """
         with open(self.path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        if data.get(agent_id) is None and raise_error_if_not_found_agent_id:
-            raise DBNotFoundError(f"agent_id = {agent_id}, 不存在")
-        return data[agent_id][name]
+        agent_data = data.get(agent_id)
+        if agent_data is None:
+            raise DBAgentIDNotFoundError(agent_id, self.path)
+        checkpoint  = data.get(name)
+        if checkpoint is None:
+            raise CheckpointNotFoundError(name, self.path)
+        return checkpoint
 

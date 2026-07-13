@@ -5,7 +5,7 @@ from .engine import Engine
 from .llm import LLM
 from .conversation import Conversation
 from .tool import Tool, BaseTool
-from .types.agent import AgentLLM
+from .types.config import LLMConfig
 from .state import State
 from .utils import build_user_message, ensure_file_exist
 from .constants import DEFAULT_AGENT_DB_PATH
@@ -14,7 +14,7 @@ class Agent:
 
     def __init__(
         self,
-        agent_llm: AgentLLM,
+        llm_config: LLMConfig,
         id: str | None = None,
         tools: list[BaseTool] | None = None,
         system_prompt: str | None = None,
@@ -37,8 +37,8 @@ class Agent:
         self.state = State(self, self.db_path, self.auto_save)
 
         self.engine = Engine(
-            model=agent_llm.model,
-            llm=LLM(agent_llm.adapter),
+            model=llm_config.model,
+            llm=LLM(llm_config.adapter),
             conversation=self.conversation,
             tool=self.tool,
             _agent=self,

@@ -7,7 +7,7 @@ from rootdriver.db import JsonDB
 from rootdriver.state import State
 from rootdriver.conversation import Conversation
 from rootdriver.types import Message
-from rootdriver.exception import CheckpointNotFoundError, StateDBNotFoundError
+from rootdriver.exceptions import CheckpointNotFoundError, StateDBNotFoundError
 
 
 class MockAgent:

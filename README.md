@@ -150,7 +150,7 @@ rootdriver/
 │   └── state.py       # State 实现
 ├── db/                # 数据库封装包
 │   └── json_db.py     # JsonDB 实现
-├── exception.py       # 异常定义
+├── exceptions.py      # 异常定义
 ├── llm/
 │   ├── llm.py         # LLM 封装
 │   ├── base_adapter.py    # 适配器基类

@@ -3,12 +3,10 @@
 rootdriver 中所有对话、LLM 请求、工具调用的基本数据单元。
 """
 
-from typing import Literal
-
 from pydantic import BaseModel, Field
 
 from .tool import ToolCall
-from ..constants import ROLE_ENUM
+from ..constants import Role
 
 class Message(BaseModel):
     """一条对话消息。
@@ -22,7 +20,7 @@ class Message(BaseModel):
     """
 
     # === 必填 ===
-    role: Literal[*ROLE_ENUM]
+    role: Role
     content: str | None = None
     created_at: str
 
@@ -38,7 +36,9 @@ class Message(BaseModel):
 
     extra: dict = Field(default_factory=dict)
     """扩展点，放任意额外数据。"""
-
+    @classmethod
+    def model_load(cls, message_dict: dict) -> "Message":
+        return cls(**message_dict)
 
 class Usage(BaseModel):
     """LLM token 用量统计。"""

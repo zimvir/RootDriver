@@ -1,4 +1,4 @@
-from .types import Message
+from .types import Message, Role
 from .utils import get_iso_timestamp, build_system_message
 
 
@@ -38,13 +38,13 @@ class Conversation:
     #     return self
 
     def append_system(self, content: str) -> "Conversation":
-        self.messages.append(Message(role="system", content=content, created_at=get_iso_timestamp()))
+        self.messages.append(Message(role=Role.SYSTEM, content=content, created_at=get_iso_timestamp()))
         return self
     def update_message(self, messages: list[Message]) -> "Conversation":
         self.messages = messages.copy()
         return self
 
-    def delete(self, index: int=-1) -> "Conversation":
+    def remove(self, index: int=-1) -> "Conversation":
         self.messages.pop(index)
         return self
 

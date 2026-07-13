@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.5.0 (2026-07-12)
+
+### Breaking Changes
+
+- **`AgentLLM` 重命名为 `LLMConfig`** - `types/agent.py` → `types/config.py`，`__init__.py` 导出名 `agent_llm` → `llm_config`，`example.py` 和所有相关引用同步更新
+- **`Role` 枚举替换字符串字面量** - `constants.ROLE_ENUM` 元组替换为 `Role(StrEnum)`，所有 role 相关字符串统一使用枚举，OpenAI 适配器需做 `role.value` 转换
+- **`JsonDB.read()` 返回值变更** - 不再接受 `raise_error_if_not_found_agent_id` 参数，改为 agent_id 不存在时抛 `DBAgentIDNotFoundError`，checkpoint 不存在时抛 `CheckpointNotFoundError`
+- **`Conversation.delete()` 重命名为 `Conversation.remove()`** - 测试文件 `test_conversation.py` 已同步更新
+
+### Features
+
+- **`ConversationRepo` 新增** - Conversation 持久化仓库类，分离持久化逻辑
+  - `save(conversation, name, agent_id, start_index, end_index)` - 全量/范围保存 conversation
+  - `append(conversation, name, agent_id, index)` - 追加单条消息
+  - `auto_append(conversation, name, agent_id, start_index)` - 增量追加从 start_index 起的消息
+  - `load(conversation, name, agent_id)` / `get(name, agent_id)` - 加载 conversation
+
+- **`Role` 枚举扩展** - 新增 `I`、`ENVIRONMENT`、`BODY`、`GENE` 角色（用于 Gezheng 项目）
+- **`build_message` 扩展** - 新增 `build_i_message`、`build_environment_message`、`build_body_message`、`build_gene_message` 函数
+- **`types` 模块新导出** - 新增 `Response`、`Role`、`LLMConfig`、`ToolResult` 到 `types/__init__.py`
+
+### Refactor
+
+- **重命名 `exception.py` → `exceptions.py`** - 符合 Python 复数命名惯例，所有 import 引用已更新
+- **`State` 重构** - 内部委托 `ConversationRepo` 处理持久化，删除大量重复代码
+  - `State.auto_save_data` 字段名从 `save_length` 改为 `saved_index`
+  - `State.save_from_now()`、`_auto_save()`、`get_from_db()`、`load_from_db()` 均已重构
+- **删除 `types/messages.py`** - 内容合并到 `types/message.py`
+- **`BaseAdapter.__init__` 简化** - 移除强制 `api_key/base_url` 参数，改为 `*args, **kwargs`
+- **`__init__.py` 导出精简** - 移除 `BaseAdapter`、`OpenAIAdapter`、`AgentLLM`、`Message`、`ToolDefinition`、`ToolCall`，统一通过 `types` 和 `llm` 子模块访问
+
+### Bug Fixes
+
+- 修复 `State._auto_save()` 字段名不一致问题（`saved_index` vs `save_length`），现统一用 `saved_index`
+- 修复 `State.save_from_checkpoints()` 使用了错误的 conversation 源（应使用 `agent.conversation` 而非 `checkpoint`）
+- 修复 `State.load_from_db()` 使用了错误的 conversation 源
+
+## 0.4.3 (2026-07-05)
+- 修复 `types/__init__.py` 漏暴露 `AgentLLM`、`ToolResult`、`Response` 的问题
+
 ## 0.4.2 (2026-07-05)
 -  在 `__init__`.py 不暴露了 `types`、`db`
 - 修改了 `pypeoject.toml` 解决了打包时 只打包了顶层包， 不打包子包的问题。

@@ -6,7 +6,7 @@ from typing import Any
 from ..base_adapter import BaseAdapter
 import openai
 
-from rootdriver.types import LLMRequest, LLMResponse, Message, Usage
+from rootdriver.types import LLMRequest, LLMResponse, Message, Usage, Role
 from rootdriver.types.tool import ToolDefinition
 
 
@@ -23,7 +23,7 @@ class OpenAIAdapter(BaseAdapter):
         """LLMRequest → OpenAI API 格式。"""
         messages = []
         for msg in req.messages:
-            m = {"role": msg.role, "content": msg.content}
+            m = {"role": msg.role.value if isinstance(msg.role, Role) else msg.role, "content": msg.content}
             if msg.tool_calls:
                 m["tool_calls"] = [
                     {

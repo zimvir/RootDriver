@@ -12,9 +12,8 @@ class ProviderResponse:
 
 class BaseAdapter(ABC):
     @abstractmethod
-    def __init__(self, api_key: str = None, base_url: str = None, *args, **kwargs):
-        self.api_key = api_key
-        self.base_url = base_url
+    def __init__(self, *args, **kwargs):
+        pass
 
 
     @abstractmethod

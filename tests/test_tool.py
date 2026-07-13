@@ -2,7 +2,7 @@ import pytest
 from rootdriver.tool.base_tool import BaseTool
 from rootdriver.tool.tools import Tool
 from rootdriver.types.tool import ToolCall
-from rootdriver.exception import ToolNotFoundError
+from rootdriver.exceptions import ToolNotFoundError
 
 
 def get_weather(city: str) -> str:

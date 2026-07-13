@@ -98,13 +98,6 @@ class StateError(Exception):
     pass
 
 
-class CheckpointNotFoundError(StateError):
-    """检查点不存在。"""
-
-    def __init__(self, name: str, source: str = "memory"):
-        self.name = name
-        self.source = source
-        super().__init__(f"Checkpoint '{name}' not found in {source}")
 
 
 class StateSaveError(StateError):
@@ -117,6 +110,24 @@ class StateLoadError(StateError):
 
 class StateDBNotFoundError(StateLoadError):
     """数据库目标对象不存在"""
+
+
+class DBAgentIDNotFoundError(Exception):
+    """DB 中 agent_id 不存在"""
+
+    def __init__(self, agent_id: str, db_path: str):
+        self.agent_id = agent_id
+        self.db_path = db_path
+        super().__init__(f"agent_id = {agent_id} 数据库 {db_path} 中不存在")
+
+
+class CheckpointNotFoundError(Exception):
+    """检查点名称不存在"""
+
+    def __init__(self, name: str, db_path: str):
+        self.name = name
+        self.db_path = db_path
+        super().__init__(f"Checkpoint '{name}' ")
 # ============= DB 相关 ===============
 
 class DBNotFoundError(Exception):
