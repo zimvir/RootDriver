@@ -1,12 +1,12 @@
 import uuid
 
-from .db import JsonDB
+from .db import JsonDB, BaseDB
 from .types import Message
 from .constants import  DEFAULT_AGENT_DB_PATH, DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
 class DBOpt:
     """数据库持久化层"""
 
-    def __init__(self, db: JsonDB, repo_id: str):
+    def __init__(self, db: BaseDB, repo_id: str):
         self.db = db
         self.repo_id = repo_id
 
@@ -29,6 +29,10 @@ class DBOpt:
         for i in range(start_index, len(messages)):
             self.db.append(checkpoint_name, self.repo_id, messages[i].model_dump())
         return self
+    def remove(self, name:str, index:int=-1) -> "DBOpt":
+        self.db.remove(name, self.repo_id, index)
+        return self
+
 
     def get(self, checkpoint_name: str) -> list[Message]:
         """从数据库返回 messages 列表。"""
@@ -66,15 +70,13 @@ class ConversationRepo:
         self.repo_id = repo_id
 
     @classmethod
-    def create(cls, db_path:str = DEFAULT_AGENT_DB_PATH, repo_id:str =  None) -> "ConversationRepo":
+    def create(cls, db:BaseDB,  repo_id:str =  None) -> "ConversationRepo":
         """
-        :param db_path:
+        :param db
         :param repo_id: 默认会自定生成 uuid4
-        :param sync_save: 是否自定保存
         :return:
         """
         repo_id = repo_id or str(uuid.uuid4())
-        db = JsonDB(db_path)
         db_opt = DBOpt(db, repo_id)
         buffer_opt = BufferOpt()
         return cls(db_opt, buffer_opt, repo_id)

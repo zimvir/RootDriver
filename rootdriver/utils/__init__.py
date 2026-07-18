@@ -11,7 +11,7 @@ build_environment_message,
 build_system_message
 )
 from .file import ensure_file_exist, check_json_format, ensure_json_file
-
+from .optional_dependence import deal_optional_dependence_installed_status
 __all__ = [
     "get_iso_timestamp",
     "build_message",
@@ -25,5 +25,6 @@ __all__ = [
     "build_body_message",
     "ensure_file_exist",
     "check_json_format",
-    "ensure_json_file"
+    "ensure_json_file",
+    "deal_optional_dependence_installed_status"
 ]

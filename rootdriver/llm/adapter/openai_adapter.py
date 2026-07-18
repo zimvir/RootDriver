@@ -4,16 +4,19 @@ import json
 import os
 from typing import Any
 from ..base_adapter import BaseAdapter
-import openai
 
 from rootdriver.types import LLMRequest, LLMResponse, Message, Usage, Role
 from rootdriver.types.tool import ToolDefinition
+from ...utils import deal_optional_dependence_installed_status
 
 
 class OpenAIAdapter(BaseAdapter):
     """OpenAI 适配器：LLMRequest ↔ OpenAI API 格式。"""
 
     def __init__(self, api_key: str = None, base_url: str = None):
+        deal_optional_dependence_installed_status("openai")
+        import openai
+
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
         self.base_url = base_url or os.environ.get("OPENAI_BASE_URL", "")
         self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url or None)

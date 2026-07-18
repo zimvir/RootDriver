@@ -7,12 +7,14 @@ from .types.config import LLMConfig
 from .utils import build_user_message
 from .constants import DEFAULT_AGENT_DB_PATH, DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
 from .conversation_repo import ConversationRepo
-
+from .db import BaseDB, JsonDB
 class Agent:
     def __init__(self, id:str, engine:Engine, conversation_repo:ConversationRepo, ):
         self.engine = engine
         self.conversation_repo = conversation_repo
         self.id = id
+
+
     @classmethod
     def create(
         cls,
@@ -20,7 +22,7 @@ class Agent:
         agent_id: str = None,
         tools: list[BaseTool] | None = None,
         system_prompt: str = None,
-        db_path: str | None = None,
+        db:BaseDB=None,
         sync_save: bool = False,
         sync_saved_checkpoint_name_in_repo: str = DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
     ):
@@ -34,7 +36,7 @@ class Agent:
             agent_id: Agent 唯一标识，默认自动生成 uuid
             tools: 工具列表，默认 None（无工具）
             system_prompt: 系统提示词，默认 None
-            db_path: 数据库路径，默认使用 DEFAULT_AGENT_DB_PATH
+            db:可自定义默认 json db
             sync_save: 是否在每次 run 结束后自动同步保存，默认 False
             sync_saved_checkpoint_name_in_repo: 自动保存的 checkpoint 名称，默认 DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
 
@@ -51,8 +53,9 @@ class Agent:
         tool  = Tool(tools)
         agent_id = agent_id or str(uuid4())
 
-        db_path = db_path or DEFAULT_AGENT_DB_PATH
-        conversation_repo = ConversationRepo.create(db_path=db_path, repo_id=agent_id)
+        if db is None:
+            db = JsonDB(DEFAULT_AGENT_DB_PATH)
+        conversation_repo = ConversationRepo.create(db=db, repo_id=agent_id)
 
 
         engine = Engine(

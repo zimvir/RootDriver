@@ -167,22 +167,22 @@ class TestConversationRepo:
     """ConversationRepo 集成测试"""
 
     def test_create_generates_repo_id(self, temp_db_path):
-        repo = ConversationRepo.create(temp_db_path)
+        repo = ConversationRepo.create(JsonDB(temp_db_path))
         assert repo.repo_id is not None
 
     def test_create_with_custom_repo_id(self, temp_db_path):
-        repo = ConversationRepo.create(temp_db_path, repo_id="my_agent")
+        repo = ConversationRepo.create(JsonDB(temp_db_path), repo_id="my_agent")
         assert repo.repo_id == "my_agent"
 
     def test_db_opt_update(self, temp_db_path, conversation):
-        repo = ConversationRepo.create(temp_db_path, repo_id="agent1")
+        repo = ConversationRepo.create(JsonDB(temp_db_path), repo_id="agent1")
         repo.db_opt.update(conversation.get_messages(), "session_1")
 
         result = repo.db_opt.get("session_1")
         assert len(result) == 3
 
     def test_buffer_opt_update(self, temp_db_path, conversation):
-        repo = ConversationRepo.create(temp_db_path, repo_id="agent1")
+        repo = ConversationRepo.create(JsonDB(temp_db_path), repo_id="agent1")
         repo.buffer_opt.update(conversation.get_messages(), "backup_1")
 
         result = repo.buffer_opt.get("backup_1")
@@ -190,10 +190,10 @@ class TestConversationRepo:
 
     def test_open_existing_repo(self, temp_db_path, conversation):
         # 创建并保存
-        repo1 = ConversationRepo.create(temp_db_path, repo_id="agent1")
+        repo1 = ConversationRepo.create(JsonDB(temp_db_path), repo_id="agent1")
         repo1.db_opt.update(conversation.get_messages(), "session_1")
 
         # 用相同 repo_id 重新创建（open 的替代方案）
-        repo2 = ConversationRepo.create(temp_db_path, repo_id="agent1")
+        repo2 = ConversationRepo.create(JsonDB(temp_db_path), repo_id="agent1")
         result = repo2.db_opt.get("session_1")
         assert len(result) == 3

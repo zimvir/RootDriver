@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.7.0 (2026-07-18)
+
+### Features
+
+- **Anthropic 适配器** - 新增 `AnthropicAdapter` (LLMRequest ↔ Anthropic API 格式转换)
+  - `request_to_provider()` - LLMRequest 转 Anthropic API 格式
+  - `response_to_frame()` - Anthropic API 响应转 LLMResponse
+  - `invoke()` / `ainvoke()` - 同步/异步发送请求
+
+- **可选依赖优化** - LLM 适配器作为可选扩展，按需安装
+  - `pip install rootdriver[openai]` - 仅 OpenAI 适配器
+  - `pip install rootdriver[anthropic]` - 仅 Anthropic 适配器
+  - `pip install rootdriver[all]` - 两个都要
+  - `pip install rootdriver` - 基础包，无 LLM 适配器
+
+- **可选依赖检测** - 新增 `deal_optional_dependence_installed_status()` 函数
+  - 检查指定可选依赖是否已安装
+  - 未安装时抛出 `OptionalDependenceNotFoundError`
+
+- **JsonDB 重构** - 分离基类与实现
+  - `BaseDB` - 数据库抽象基类
+  - `JsonDB` - JSON 文件实现
+
+### Code Quality
+
+- 测试覆盖：63 个测试全部通过
+- 新增 `tests/test_anthropic_adapter.py`
+
 ## 0.6.1 (2026-07-18)
 
 ### Refactor

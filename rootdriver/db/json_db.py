@@ -1,20 +1,19 @@
 import json
 
-from ..exceptions import DBAgentIDNotFoundError, CheckpointNotFoundError
-from pathlib import Path
 from ..utils import ensure_json_file
-class JsonDB:
+from .base_db import BaseDB
+
+
+class JsonDB(BaseDB):
+    """JSON 文件数据库实现。"""
+
     def __init__(self, path):
         self.path = path
-        # 确保文件 存在且符合 json 格式
+        # 确保文件存在且符合 json 格式
         ensure_json_file(self.path, default_content="{}", use_default_content_if_file_is_empty_str=True)
-    def update(self, name: str, agent_id:str, messages: list[dict]) -> "JsonDB":
-        """
-        Args:
-            name: 检查点 的名称
-            agent_id: agent的id， 默认当前agent的id
-            messages:
-        """
+
+    def update(self, name: str, agent_id: str, messages: list[dict]) -> "JsonDB":
+        """全量覆写指定 agent 的指定 checkpoint。"""
         with open(self.path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if data.get(agent_id) is None:
@@ -24,12 +23,8 @@ class JsonDB:
             json.dump(data, f, ensure_ascii=False, indent=2)
         return self
 
-    def append(self, name: str, agent_id, message: dict,) -> "JsonDB":
-        """
-        Args:
-            name: 检查点 的名称
-            agent_id: agent的id， 默认当前agent的id
-        """
+    def append(self, name: str, agent_id: str, message: dict) -> "JsonDB":
+        """追加单条消息到指定 agent 的指定 checkpoint。"""
         with open(self.path, "r", encoding="utf-8") as f:
             data = json.load(f)
         if data.get(agent_id) is None:
@@ -41,26 +36,21 @@ class JsonDB:
             json.dump(data, f, ensure_ascii=False, indent=2)
         return self
 
-    def read(self, name: str, agent_id: str, raise_error_if_not_found:bool=False) -> list[dict]|None:
-        """
-        Return:
-            若 未找到 agent id 报错 DBAgentIDNotFoundError;
-            未找到 checpoint 返回 None
-        """
+    def remove(self, name: str, agent_id: str, index: int = -1) -> "JsonDB":
+        """删除指定 checkpoint 中的单条消息。"""
+        data = self.read(name, agent_id)
+        data.pop(index)
+        self.update(name, agent_id, data)
+        return self
+
+    def read(self, name: str, agent_id: str) -> list[dict]:
+        """读取指定 agent 的指定 checkpoint 的所有消息。"""
         with open(self.path, "r", encoding="utf-8") as f:
             data = json.load(f)
         agent_data = data.get(agent_id)
         if agent_data is None:
-            if raise_error_if_not_found is False:
-                return []
-            else:
-                raise DBAgentIDNotFoundError(agent_id, self.path)
-
-        checkpoint  = agent_data.get(name)
+            return []
+        checkpoint = agent_data.get(name)
         if checkpoint is None:
-            if raise_error_if_not_found is False:
-                return []
-            else:
-                raise CheckpointNotFoundError(name, self.path)
+            return []
         return checkpoint
-

@@ -132,3 +132,10 @@ class CheckpointNotFoundError(Exception):
 
 class DBNotFoundError(Exception):
     """数据库未找到结果"""
+
+
+
+class OptionalDependenceNotFoundError(Exception):
+    def __init__(self, dependence_name: str):
+        self.dependence_name = dependence_name
+        super().__init__(f"可选依赖 '{dependence_name}' 未找到, 若要安装此包，请在终端中输入 `pip install {dependence_name}`")
