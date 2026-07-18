@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.1 (2026-07-18)
+
+### Refactor
+
+- **删除 `State` 模块** - 功能已被 `ConversationRepo` 替代，不再需要独立的 State 类
+- **清理 `agent.py` 无用 imports** - 移除 `pathlib.Path`、`asyncio`、`State`、`ensure_file_exist`
+
 ## 0.6.0 (2026-07-18)
 
 ### Breaking Changes
