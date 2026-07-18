@@ -10,7 +10,7 @@ build_gene_message,
 build_environment_message,
 build_system_message
 )
-from .file import ensure_file_exist
+from .file import ensure_file_exist, check_json_format, ensure_json_file
 
 __all__ = [
     "get_iso_timestamp",
@@ -23,5 +23,7 @@ __all__ = [
     "build_environment_message",
     "build_i_message",
     "build_body_message",
-    "ensure_file_exist"
+    "ensure_file_exist",
+    "check_json_format",
+    "ensure_json_file"
 ]

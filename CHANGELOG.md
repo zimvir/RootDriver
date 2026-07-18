@@ -1,5 +1,66 @@
 # Changelog
 
+## 0.6.0 (2026-07-18)
+
+### Breaking Changes
+
+- **`Engine.__init__` 移除 `model` 参数** - `model` 从 Engine 移除，改为由 Agent 在创建时从 `llm_config` 传入
+- **`Agent.create()` 替代直接构造** - 推荐使用工厂方法创建 Agent，内部自动组装 LLM、Conversation、Tool、ConversationRepo、Engine
+- **`LLM.__init__` 新增 `model` 参数** - 原 `model` 移至 LLM 构造参数
+- **`Conversation.append_system` 重命名为 `append_system_message`** - 语义更明确
+
+### Features
+
+- **`ConversationRepo` 重构** - 分离 DBOpt 和 BufferOpt 两个子模块
+  - `DBOpt` - 数据库持久化层
+    - `update(messages, checkpoint_name)` - 全量覆写
+    - `append(message, checkpoint_name)` - 追加单条
+    - `sync_append(messages, checkpoint_name, start_index)` - 增量追加
+    - `get(checkpoint_name)` - 读取 messages 列表
+  - `BufferOpt` - 内存快照层
+    - `update(messages, checkpoint_name)` - 保存到内存
+    - `get(checkpoint_name)` - 获取 messages
+    - `remove(checkpoint_name)` - 删除快照
+  - `ConversationRepo.create(db_path, repo_id)` - 工厂方法，自动生成 repo_id
+  - `ConversationRepo.open(db_path, repo_id)` - 工厂方法，打开已存在的 repo
+
+- **`LLM` 工具方法**
+  - `messages_to_llm_request(messages, tool_definitions)` - 构建 LLM 请求
+  - `llm_response_to_message(response)` - 提取响应消息（静态方法）
+
+- **`Agent.create()` 工厂方法** - 简化 Agent 创建流程
+  ```python
+  agent = Agent.create(
+      llm_config=llm_config,
+      agent_id="user_001",
+      tools=[get_weather],
+      system_prompt="你是一个助手",
+      db_path="memory.json",
+      sync_save=True,
+  )
+  ```
+
+- **`ensure_json_file()` 新增** - 确保文件存在且为有效 JSON
+- **`check_json_format()` 新增** - 检查文件是否为有效 JSON
+
+### Bug Fixes
+
+- 修复 `ensure_json_file()` 判断逻辑反了的问题（有效 JSON 文件被错误清空）
+- 修复 `JsonDB.read()` 读取路径错误（`data.get(name)` 应为 `data[agent_id].get(name)`）
+- 修复 `JsonDB` 初始化时不检查文件存在性的问题
+
+### Refactor
+
+- **删除 `Engine.create()`** - 工厂方法价值不大，直接使用 `__init__`
+- **删除 `State` 与 `Engine` 的循环依赖** - Engine 不再持有 `_agent` 引用
+- **`Engine` 持有 `ConversationRepo` 而非 Agent** - 解耦 engine 和 agent
+- **`Engine` 内部调用 `LLM` 的静态方法** - `messages_to_llm_request` 和 `llm_response_to_message`
+- **`Engine.run()` / `Engine.arun()` 的 sync_save** - 直接调用 `conversation_repo.db_opt.sync_append`
+- **`Conversation` 移除 `repo` 属性** - 不再内置 repo，repo 由外部传入
+- **`Conversation.copy()` 保留 `system_prompt`** - 修复拷贝丢失 system_prompt 的问题
+- **`Conversation.append_system_message`** - 新增，替代原有的 `append_system`
+- **测试文件重构** - `test_conversation.py` 和 `test_state.py` 适配新 API
+
 ## 0.5.0 (2026-07-12)
 
 ### Breaking Changes

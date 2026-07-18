@@ -18,5 +18,5 @@ class Role(StrEnum):
     GENE  = "gene"
 
 
-DEFAULT_AGENT_STATE_AUTO_SAVE_NAME = "auto_saved"
+DEFAULT_AGENT_STATE_AUTO_SAVE_NAME = "sync_saved"
 DEFAULT_AGENT_DB_PATH = "conversations.json"

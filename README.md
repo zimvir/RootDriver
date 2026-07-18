@@ -41,20 +41,18 @@ def get_weather(city: str) -> str:
 ### 创建 Agent
 
 ```python
-from rootdriver import Agent, AgentLLM, OpenAIAdapter
+from rootdriver import Agent, LLMConfig, OpenAIAdapter
 
-agent_llm = AgentLLM(
+llm_config = LLMConfig(
+    model="gpt-4",
     adapter=OpenAIAdapter(
         api_key="YOUR_API_KEY",
         base_url="BASE_URL"
-    ),
-    model= "gpt-4",
-    temperature=0.7
     )
+)
 
-
-agent = Agent(
-    agent_llm=agent_llm,
+agent = Agent.create(
+    llm_config=llm_config,
     tools=[get_weather],
     system_prompt="你是一个有用的助手",
 )
@@ -76,7 +74,7 @@ print(response)
 
 ```python
 import asyncio
-from rootdriver import Agent, AgentLLM, OpenAIAdapter
+from rootdriver import Agent, LLMConfig, OpenAIAdapter
 
 async def main():
 
@@ -96,35 +94,40 @@ asyncio.run(main())
 
 ## 记忆持久化
 
-Agent 支持对话历史自动持久化到 JSON 文件：
+Agent 支持对话历史持久化到 JSON 文件：
 
 ```python
-agent = Agent(
-    agent_llm=agent_llm,
+agent = Agent.create(
+    llm_config=llm_config,
     system_prompt="你是一个有用的助手",
-    db_path="conversations.json",     # 记忆数据库路径
-    auto_save=True,            # 开启自动保存（默认开启）
+    db_path="conversations.json",
 )
 
-# 对话自动增量保存到 memory.json
+# 对话
 response = agent.react("我们之前聊了什么？")
 
-# 新建 Agent 时可从数据库恢复对话历史
-agent2 = Agent(agent_llm=agent_llm, id="same_user", db_path="memory.json")
-agent2.state.load_from_db("auto_saved")  # 恢复对话
+# 手动保存到数据库
+agent.conversation_repo.db_opt.update(
+    agent.engine.conversation.get_messages(),
+    checkpoint_name="session_1"
+)
+
+# 从数据库恢复对话历史
+messages = agent.conversation_repo.db_opt.get("session_1")
+agent.engine.conversation.update_message(messages)
 ```
 
-### 手动检查点
+### 内存快照
 
 ```python
-# 内存快照
-agent.state.checkpoint("backup_point")
+# 保存到内存快照
+agent.conversation_repo.buffer_opt.update(
+    agent.engine.conversation.get_messages(),
+    checkpoint_name="backup_point"
+)
 
-# 保存到数据库
-agent.state.save_from_checkpoints(name="my_backup", checkpoint_name="backup_point")
-
-# 从数据库加载
-agent.state.load_from_db("my_backup")
+# 从内存快照恢复
+messages = agent.conversation_repo.buffer_opt.get("backup_point")
 ```
 
 ## 核心组件
@@ -146,8 +149,8 @@ rootdriver/
 ├── agent.py           # Agent 智能体
 ├── engine.py          # 引擎核心
 ├── conversation.py    # 对话管理
-├── state/             # 状态管理包
-│   └── state.py       # State 实现
+├── conversation_repo.py # 会话持久化仓库
+├── state.py           # 状态管理（保留但待简化）
 ├── db/                # 数据库封装包
 │   └── json_db.py     # JsonDB 实现
 ├── exceptions.py      # 异常定义

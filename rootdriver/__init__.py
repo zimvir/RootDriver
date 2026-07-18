@@ -1,13 +1,12 @@
-__version__ = "0.4.3"
+__version__ = "0.6.0"
 __author__ = "zimvir"
 __email__ = "zimvir@qq.com"
 
 from .agent import Agent
-from .engine import Engine
 from .conversation import Conversation
-from .state import State
 from .llm import LLM
 from .tool import tool, Tool, BaseTool
+from .conversation_repo import ConversationRepo
 from .exceptions import (
     LLMError,
     LLMInvokeError,
@@ -18,23 +17,18 @@ from .exceptions import (
     ToolArgumentError,
     AgentError,
     ConversationError,
-    StateError,
     CheckpointNotFoundError,
-    StateSaveError,
-    StateLoadError,
     StateDBNotFoundError,
-    DBNotFoundError,
 )
 
 __all__ = [
     "Agent",
-    "Engine",
     "Conversation",
-    "State",
     "LLM",
     "tool",
     "Tool",
     "BaseTool",
+    "ConversationRepo",
 
     "LLMError",
     "LLMInvokeError",
@@ -45,12 +39,8 @@ __all__ = [
     "ToolArgumentError",
     "AgentError",
     "ConversationError",
-    "StateError",
     "CheckpointNotFoundError",
-    "StateSaveError",
-    "StateLoadError",
     "StateDBNotFoundError",
-    "DBNotFoundError",
 ]
 
 from .types.config import LLMConfig

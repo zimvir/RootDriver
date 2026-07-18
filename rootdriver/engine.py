@@ -1,21 +1,31 @@
-import asyncio
 
+from __future__ import annotations
 from .llm import LLM
 from .conversation import Conversation
 from .tool import Tool
 from .types import LLMRequest, Message
 from .utils import  get_iso_timestamp,build_tool_message, build_message
-from typing import Any
-
+from .conversation_repo import ConversationRepo
+from .constants import  DEFAULT_AGENT_DB_PATH, DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
 
 class Engine:
-    def __init__(self, model:str, llm:LLM, conversation:Conversation, tool:Tool, _agent: Any):
+    def __init__(
+            self,
+            llm:LLM,
+            conversation:Conversation,
+            tool:Tool, conversation_repo:ConversationRepo,
+            sync_save:bool = False,
+            sync_saved_checkpoint_name_in_repo:str = DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
+    ):
+
         self.llm = llm
         self.conversation = conversation
         self.tool = tool
-        self.model = model
-        self._agent = _agent  # 以实现 agent 的 auto_save
+        self.conversation_repo = conversation_repo  # 为实现sync_save
+        self.sync_save = sync_save
+        self.sync_saved_checkpoint_name = sync_saved_checkpoint_name_in_repo
 
+        
     def invoke(self, input_message:Message) -> Message:
         """但系调用llm，并存入记忆，无tool调用"""
         self.conversation.append(input_message)
@@ -32,10 +42,10 @@ class Engine:
         message = self.conversation.get_messages()
 
         # 2. llm交互
-        response = self.llm.invoke(self.messages_to_llm_request(message))
+        response = self.llm.invoke(self.llm.messages_to_llm_request(message, self.tool.to_definitions()))
 
         # 3. 追加会话消息
-        response_message = self.llm_response_to_message(response)
+        response_message = self.llm.llm_response_to_message(response)
         self.conversation.append(response_message)
 
         return response_message
@@ -57,7 +67,7 @@ class Engine:
             # 6. 否： 追加并返回
             return response_message
 
-    def run(self, input_message:Message) ->Message:
+    def run(self, input_message:Message) ->Message|None:
         """
         1. 追加输入
         2. 读会话消息
@@ -75,19 +85,9 @@ class Engine:
             if result is None:
                 continue
             elif isinstance(result, Message):
-                self._agent.state._auto_save()
+                if self.sync_save:
+                    self.conversation_repo.db_opt.sync_append(self.conversation.messages, self.sync_saved_checkpoint_name)
                 return result
-
-    def messages_to_llm_request(self,messages:list[Message]) -> LLMRequest:
-        return LLMRequest(
-            model=self.model,
-            messages=messages,
-            tools=self.tool.to_definitions(),
-        )
-
-    def llm_response_to_message(self, response) -> Message:
-        """把 LLM 响应转成 Message 。"""
-        return response.message
 
     """==========异步部分=========="""
     async def ainvoke(self, input_message:Message) -> Message:
@@ -106,10 +106,10 @@ class Engine:
         message = self.conversation.get_messages()
 
         # 2. llm交互
-        response = await self.llm.ainvoke(self.messages_to_llm_request(message))
+        response = await self.llm.ainvoke(self.llm.messages_to_llm_request(message, self.tool.to_definitions()))
 
         # 3. 追加会话消息
-        response_message = self.llm_response_to_message(response)
+        response_message = self.llm.llm_response_to_message(response)
         self.conversation.append(response_message)
 
         return response_message
@@ -148,5 +148,8 @@ class Engine:
             if result is None:
                 continue
             elif isinstance(result, Message):
-                self._agent.state._auto_save()
+                self.conversation_repo.db_opt.sync_append(
+                    self.conversation.messages,
+                    self.sync_saved_checkpoint_name
+                )
                 return result

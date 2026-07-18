@@ -8,43 +8,70 @@ from .tool import Tool, BaseTool
 from .types.config import LLMConfig
 from .state import State
 from .utils import build_user_message, ensure_file_exist
-from .constants import DEFAULT_AGENT_DB_PATH
+from .constants import DEFAULT_AGENT_DB_PATH, DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
+from .conversation_repo import ConversationRepo
 
 class Agent:
-
-    def __init__(
-        self,
+    def __init__(self, id:str, engine:Engine, conversation_repo:ConversationRepo, ):
+        self.engine = engine
+        self.conversation_repo = conversation_repo
+        self.id = id
+    @classmethod
+    def create(
+        cls,
         llm_config: LLMConfig,
-        id: str | None = None,
+        agent_id: str = None,
         tools: list[BaseTool] | None = None,
-        system_prompt: str | None = None,
-
-        db_path: str| None = None,
-        auto_save: bool = True,
-        # llm_retry: int = 3,
-        # timeout: float | None = None,
+        system_prompt: str = None,
+        db_path: str | None = None,
+        sync_save: bool = False,
+        sync_saved_checkpoint_name_in_repo: str = DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
     ):
-        # 检查信息
-        ensure_file_exist(db_path,"{}")
+        """
+        工厂方法：创建 Agent 实例。
 
-        # 初始化模块
-        self.id = id if id else uuid4().hex
-        self.db_path = DEFAULT_AGENT_DB_PATH
-        self.auto_save = auto_save
+        内部组装：LLM -> Conversation -> Tool -> ConversationRepo -> Engine -> Agent
 
-        self.conversation = Conversation(system_prompt)
-        self.tool = Tool(tools if tools else [])
-        self.state = State(self, self.db_path, self.auto_save)
+        Args:
+            llm_config: LLM 配置（包含 adapter 和 model）
+            agent_id: Agent 唯一标识，默认自动生成 uuid
+            tools: 工具列表，默认 None（无工具）
+            system_prompt: 系统提示词，默认 None
+            db_path: 数据库路径，默认使用 DEFAULT_AGENT_DB_PATH
+            sync_save: 是否在每次 run 结束后自动同步保存，默认 False
+            sync_saved_checkpoint_name_in_repo: 自动保存的 checkpoint 名称，默认 DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
 
-        self.engine = Engine(
-            model=llm_config.model,
-            llm=LLM(llm_config.adapter),
-            conversation=self.conversation,
-            tool=self.tool,
-            _agent=self,
+        Returns:
+            Agent 实例
+        """
+        llm = LLM(llm_config.adapter, llm_config.model)
+
+        if system_prompt:
+            conversation = Conversation(system_prompt)
+        else:
+            conversation = Conversation()
+
+        tool  = Tool(tools)
+        agent_id = agent_id or str(uuid4())
+
+        db_path = db_path or DEFAULT_AGENT_DB_PATH
+        conversation_repo = ConversationRepo.create(db_path=db_path, repo_id=agent_id)
+
+
+        engine = Engine(
+            llm=llm,
+            conversation=conversation,
+            tool=tool,
+            conversation_repo=conversation_repo,
+            sync_save=sync_save,
+            sync_saved_checkpoint_name_in_repo=sync_saved_checkpoint_name_in_repo,
         )
-        # 属性初始化
-        self.state.update_auto_save_data_saved_length()
+        return cls(
+            id=agent_id,
+            engine=engine,
+            conversation_repo=conversation_repo,
+        )
+
 
     def react(self, input_prompt:str) -> "str":
         """一次 react 循环"""
