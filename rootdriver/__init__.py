@@ -1,4 +1,4 @@
-__version__ = "0.6.1"
+__version__ = "0.8.0"
 __author__ = "zimvir"
 __email__ = "zimvir@qq.com"
 
@@ -26,8 +26,6 @@ __all__ = [
     "Conversation",
     "LLM",
     "tool",
-    "Tool",
-    "BaseTool",
     "ConversationRepo",
 
     "LLMError",

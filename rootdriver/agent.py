@@ -93,5 +93,12 @@ class Agent:
         """一次 agent 异步调用"""
         return await self.engine.ainvoke(build_user_message(input_prompt)).content
 
+    '''==========校验调用=========='''
+    def validation_react(self, input_prompt:str, schema, retry:int=3) -> str|None:
+        result = self.engine.validation_run(build_user_message(input_prompt), schema, retry)
+        return result.content if result else None
 
+    async def avalidation_react(self, input_prompt:str, schema, retry:int=3) -> str|None:
+        result = await self.engine.avalidation_run(build_user_message(input_prompt), schema, retry)
+        return result.content if result else None
 

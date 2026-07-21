@@ -1,12 +1,16 @@
 
 from __future__ import annotations
+
+import json
+
 from .llm import LLM
 from .conversation import Conversation
 from .tool import Tool
 from .types import LLMRequest, Message
-from .utils import  get_iso_timestamp,build_tool_message, build_message
+from .utils import get_iso_timestamp, build_tool_message, build_message, build_user_message
 from .conversation_repo import ConversationRepo
 from .constants import  DEFAULT_AGENT_DB_PATH, DEFAULT_AGENT_STATE_AUTO_SAVE_NAME
+from jsonschema import validate, ValidationError
 
 class Engine:
     def __init__(
@@ -86,7 +90,7 @@ class Engine:
                 continue
             elif isinstance(result, Message):
                 if self.sync_save:
-                    self.conversation_repo.db_opt.sync_append(self.conversation.messages, self.sync_saved_checkpoint_name)
+                    self.conversation_repo.db_opt.sync(self.conversation.messages, self.sync_saved_checkpoint_name)
                 return result
 
     """==========异步部分=========="""
@@ -148,8 +152,41 @@ class Engine:
             if result is None:
                 continue
             elif isinstance(result, Message):
-                self.conversation_repo.db_opt.sync_append(
+                self.conversation_repo.db_opt.sync(
                     self.conversation.messages,
                     self.sync_saved_checkpoint_name
                 )
                 return result
+
+    '''==========校验=========='''
+    def validation_run(self, input_message:Message, schema, retry:int=3) -> Message|None:
+        for i in range(retry):
+            result_message = self.run(input_message)
+            result_json = result_message.content
+
+            try:
+                result = json.loads(result_json)
+                try:
+                    validate(result, schema)
+                    return result_message
+                except ValidationError as e:
+                    input_message = build_user_message(f"数据格式校验未通过:\n{str(e)}")
+            except json.decoder.JSONDecodeError as e:
+                input_message = build_user_message(f"数据格式 不符合 json 格式。错误:\n{str(e)}")
+        return None
+
+    async def avalidation_run(self, input_message: Message, schema, retry: int = 3) -> Message|None:
+        for i in range(retry):
+            result_message = (await self.arun(input_message))
+            result_json = result_message.content
+            try:
+                result = json.loads(result_json)
+                try:
+                    validate(result, schema)
+                    return result_message
+                except ValidationError as e:
+                    input_message = build_user_message(f"数据格式校验未通过:\n{str(e)}")
+            except json.decoder.JSONDecodeError as e:
+                input_message = build_user_message(f"数据格式 不符合 json 格式。错误:\n{str(e)}")
+        return None
+

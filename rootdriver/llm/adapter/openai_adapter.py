@@ -7,18 +7,29 @@ from ..base_adapter import BaseAdapter
 
 from rootdriver.types import LLMRequest, LLMResponse, Message, Usage, Role
 from rootdriver.types.tool import ToolDefinition
-from ...utils import deal_optional_dependence_installed_status
+from ...utils import deal_optional_dependence_installed_status, strip_think_content
 
 
 class OpenAIAdapter(BaseAdapter):
-    """OpenAI 适配器：LLMRequest ↔ OpenAI API 格式。"""
+    """OpenAI 兼容适配器：LLMRequest ↔ OpenAI API 格式。
 
-    def __init__(self, api_key: str = None, base_url: str = None):
+    支持 OpenAI API 以及兼容 OpenAI 协议的其他服务商（如 MiniMax、硅基流动等）。
+    部分服务商会在 content 中混入 <think>...</think> 思考过程标签，
+    设置 strip_think=True（默认）会自动去除。
+
+    Args:
+        api_key: API 密钥，默认从环境变量 OPENAI_API_KEY 读取
+        base_url: API base URL，默认从环境变量 OPENAI_BASE_URL 读取
+        strip_think: 是否去除 LLM 返回内容中的 <think>...</think> 思考过程标签，默认为 True
+    """
+
+    def __init__(self, api_key: str = None, base_url: str = None, strip_think: bool = True):
         deal_optional_dependence_installed_status("openai")
         import openai
 
         self.api_key = api_key or os.environ.get("OPENAI_API_KEY", "")
         self.base_url = base_url or os.environ.get("OPENAI_BASE_URL", "")
+        self.strip_think = strip_think
         self.client = openai.OpenAI(api_key=self.api_key, base_url=self.base_url or None)
         self.async_client = openai.AsyncOpenAI(api_key=self.api_key, base_url=self.base_url or None)
 
@@ -70,9 +81,13 @@ class OpenAIAdapter(BaseAdapter):
         choice = resp.choices[0]
         msg_data = choice.message
 
+        content = msg_data.content
+        if self.strip_think and content:
+            content = strip_think_content(content)
+
         message = Message(
             role=msg_data.role,
-            content=msg_data.content,
+            content=content,
             created_at=resp.created and str(resp.created) or "",
         )
 

@@ -146,24 +146,42 @@ messages = agent.conversation_repo.buffer_opt.get("backup_point")
 
 ```
 rootdriver/
+├── __init__.py        # 包入口，导出核心组件和异常
 ├── agent.py           # Agent 智能体
-├── engine.py          # 引擎核心
+├── engine.py          # 引擎核心（DBOpt/BufferOpt/ConversationRepo）
 ├── conversation.py    # 对话管理
 ├── conversation_repo.py # 会话持久化仓库
-├── state.py           # 状态管理（保留但待简化）
-├── db/                # 数据库封装包
-│   └── json_db.py     # JsonDB 实现
 ├── exceptions.py      # 异常定义
+├── constants.py       # 常量定义
+├── db/                # 数据库封装包
+│   ├── __init__.py
+│   ├── base_db.py     # 数据库抽象基类
+│   └── json_db.py     # JsonDB 实现
 ├── llm/
+│   ├── __init__.py
 │   ├── llm.py         # LLM 封装
 │   ├── base_adapter.py    # 适配器基类
 │   └── adapter/
-│       └── openai_adapter.py  # OpenAI 适配器
+│       ├── __init__.py
+│       ├── anthropic_adapter.py  # Anthropic 适配器
+│       └── openai_adapter.py     # OpenAI 兼容适配器
 ├── tool/
+│   ├── __init__.py
 │   ├── base_tool.py   # 工具基类
 │   └── tools.py       # 工具集
 ├── types/             # 类型定义
+│   ├── __init__.py
+│   ├── config.py      # LLMConfig 等配置类型
+│   ├── message.py     # Message 消息类型
+│   ├── llm.py         # LLMRequest/LLMResponse
+│   └── tool.py        # ToolDefinition/ToolCall
 └── utils/             # 工具函数
+    ├── __init__.py
+    ├── build_message.py   # 消息构建函数
+    ├── file.py        # 文件操作
+    ├── optional_dependence.py  # 可选依赖检测
+    ├── strip_think.py # 去除思考过程标签
+    └── time.py        # 时间工具
 ```
 
 ## License

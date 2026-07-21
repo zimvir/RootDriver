@@ -7,13 +7,24 @@ from ..base_adapter import BaseAdapter
 
 from rootdriver.types import LLMRequest, LLMResponse, Message, Usage, Role
 from rootdriver.types.tool import ToolDefinition, ToolCall
-
+from ...utils import deal_optional_dependence_installed_status
 
 class AnthropicAdapter(BaseAdapter):
-    """Anthropic 适配器：LLMRequest ↔ Anthropic API 格式。"""
+    """Anthropic 适配器：LLMRequest ↔ Anthropic API 格式。
+
+    仅支持 Anthropic 官方 API（Claude 系列模型）。
+    Anthropic 的响应 content 是 block 列表（text/tool_use/tool_result），
+    会在 response_to_frame 中拼接成字符串。
+
+    Args:
+        api_key: API 密钥，默认从环境变量 ANTHROPIC_API_KEY 读取
+        base_url: API base URL，默认使用官方地址
+    """
 
     def __init__(self, api_key: str = None, base_url: str = None):
+        deal_optional_dependence_installed_status("anthropic")
         from anthropic import Anthropic
+
 
         self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY", "")
         self.base_url = base_url

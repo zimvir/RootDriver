@@ -24,10 +24,9 @@ class DBOpt:
         self.db.append(checkpoint_name, self.repo_id, message.model_dump())
         return self
 
-    def sync_append(self, messages:list[Message], checkpoint_name: str, start_index: int = 0) -> "DBOpt":
-        """增量追加从 start_index 起的新消息到数据库。"""
-        for i in range(start_index, len(messages)):
-            self.db.append(checkpoint_name, self.repo_id, messages[i].model_dump())
+    def sync(self, messages:list[Message], checkpoint_name: str) -> "DBOpt":
+        """同步conv的消息列表到数据库。"""
+        self.db.update(checkpoint_name, self.repo_id, [message.model_dump() for message in messages])
         return self
     def remove(self, name:str, index:int=-1) -> "DBOpt":
         self.db.remove(name, self.repo_id, index)

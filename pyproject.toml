@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rootdriver"
-version = "0.7.1"
+version = "0.8.0"
 description = "Start from Root, Driving All Things"
 readme = "README.md"
 license = {text = "MIT"}

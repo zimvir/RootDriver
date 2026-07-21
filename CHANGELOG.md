@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.8.0 (2026-07-21)
+
+### Bug Fixes
+
+- **修复 sync_append 重复追加问题** - `DBOpt.sync()` 改用全量覆写 `update()` 替代增量追加，避免每次从头开始追加导致消息重复
+  - `Engine.run()` / `Engine.arun()` 的 sync_save 逻辑改为直接调用 `db_opt.update()`
+  - 不再需要维护 `last_sync_index`
+
+- **修复 MiniMax 等服务商思考过程标签问题** - 新增 `strip_think_content()` 去除 LLM 返回内容中的 <think>...</think> 思考过程标签
+  - 新增 `rootdriver/utils/strip_think.py`
+  - `OpenAIAdapter` 新增 `strip_think` 参数（默认为 True），自动去除混入 content 的思考过程
+
+### Features
+
+- **`OpenAIAdapter.strip_think` 参数** - 控制是否去除思考过程标签
+  - 默认为 True，自动去除 <think>...</think> 标签及内容
+  - 设为 False 可保留原始 content（适用于官方 OpenAI 等标准服务商）
+
+- **新增 `strip_think_content()` 工具函数** - `rootdriver.utils` 导出
+
+## 0.7.1 (2026-07-20) 
+
+- 更改了对外暴露的模块,目前 主包的入口除了暴露异常外只暴露一级子包、模块，一级子包会暴露其内部所有模块
+- 修改了主包入口的 `__version__` 的版号错误
 ## 0.7.0 (2026-07-18)
 
 ### Features
