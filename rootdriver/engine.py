@@ -159,7 +159,7 @@ class Engine:
                 return result
 
     '''==========校验=========='''
-    def validation_run(self, input_message:Message, schema, retry:int=3) -> Message|None:
+    def validated_run(self, input_message:Message, schema, retry:int=3) -> Message|None:
         for i in range(retry):
             result_message = self.run(input_message)
             result_json = result_message.content
@@ -175,7 +175,7 @@ class Engine:
                 input_message = build_user_message(f"数据格式 不符合 json 格式。错误:\n{str(e)}")
         return None
 
-    async def avalidation_run(self, input_message: Message, schema, retry: int = 3) -> Message|None:
+    async def avalidated_run(self, input_message: Message, schema, retry: int = 3) -> Message|None:
         for i in range(retry):
             result_message = (await self.arun(input_message))
             result_json = result_message.content

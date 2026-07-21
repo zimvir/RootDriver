@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.1 (2026-07-21)
+
+### Refactor
+
+- **`validation_run` 重命名为 `validated_run`** - `Engine.validated_run()` / `Engine.avalidated_run()` 更符合英文逻辑（强调结果是经过验证的）
+- **`validation_react` 重命名为 `validated_react`** - `Agent.validated_react()` / `Agent.avalidated_react()` 命名更准确
+
 ## 0.8.0 (2026-07-21)
 
 ### Bug Fixes
